@@ -3,6 +3,6 @@ use minigrep::Config;
 
 fn main() {
     if let Err(e) = minigrep::run(Config::new()) {
-        println!("Application error : {}", e);
+        eprintln!("Application error : {}", e);
     }
 }
