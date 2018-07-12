@@ -34,28 +34,25 @@ a whopping number of rats";
     }
 }
 
+// Note concerning iterators API:
+//   This abstracts away some of the commonplace code so it’s easier to see the concepts that are
+//   unique to this code, such as the filtering condition each element in the iterator must pass.
+//   In other words, we get rid of the boilerplate code (such as creation of new auxiliary vars)
+//   Iterators are zero-cost abstractions.
+
 // Here we are saying that the lifetime of the return value is connected to the lifetime of the
 // contents variable
 pub fn search<'a>(query : &str, contents : &'a str) -> Vec<&'a str> {
-    let mut res = vec![];
-    for line in contents.lines() {
-        if line.contains(query) {
-            res.push(line);
-        }
-    }
-    res
+    contents.lines()
+            .filter(|line| line.contains(query))
+            .collect()
 }
 
 pub fn search_case_insensitive<'a>(query : &str, contents : &'a str) -> Vec<&'a str> {
     let query = query.to_lowercase();
-    let mut res = vec![];
-    // We cannot call the lowercase on the contents itself as the string slices would be invalid
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            res.push(line);
-        }
-    }
-    res
+    contents.lines()
+            .filter(|line| line.to_lowercase().contains(&query))
+            .collect()
 }
 
 pub struct Config {
@@ -68,7 +65,11 @@ pub struct Config {
 impl Config {
     pub fn new() -> Config {
         use argparse::{ArgumentParser, Store};
-        let mut args = Config { file_path : String::new(), pattern : String::new(), case_sensitive : env::var("CASE_INSENSITIVE").is_err() };
+        let mut args = Config {
+            file_path : String::new(),
+            pattern : String::new(),
+            case_sensitive : env::var("CASE_INSENSITIVE").is_err()
+        };
         {  // this block limits the scope for the ap.refer method
             let mut ap = ArgumentParser::new();
             ap.set_description("Yet another grep-like tool which is being programmed for teaching purposes only.");
